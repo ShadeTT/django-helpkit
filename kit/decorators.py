@@ -1,12 +1,9 @@
 # coding=utf-8
 
 import os
+import signal
 import sys
-import datetime
-from django.conf import settings
-from django.template.context import RequestContext
-from django.http.response import HttpResponse
-from django.template.loader import render_to_string
+import tempfile
 from django.utils.six import wraps
 
 __author__ = 'shade'
@@ -17,25 +14,42 @@ def pid_lock(*args, **kwargs):
     # TODO: документация
 
     def outer_wrapper(f):
+
         filename = kwargs.get('filename')
 
+        @wraps(f)
         def inner_wrapper(*args, **kwargs):
 
-            # TODO: нужна обработка событий ctrl+c и kill
+            pidfile = os.path.join(tempfile.gettempdir(), "%s.pid" % filename)
+
+            def remove_pid(*args, **kwargs):
+                os.remove(pidfile)
+                sys.exit()
+
+            signal.signal(signal.SIGINT, remove_pid)
+
+            if os.path.exists(pidfile):
+
+                pid = open(pidfile).read()
+                pid = int(pid) if pid else None
+
+                try:
+                    os.kill(pid, 0)
+                except OSError:
+                    os.remove(pidfile)
+                except TypeError:
+                    os.remove(pidfile)
+                else:
+                    print 'It is already running'
+                    sys.exit()
 
             pid = str(os.getpid())
-            pidfile = settings.BASE_DIR + "/%s.pid" % filename
+            with open(pidfile, 'w') as pf:
+                pf.write(pid)
 
-            if os.path.isfile(pidfile):
-                sys.exit()
-            else:
-                file(pidfile, 'w').write(pid)
+            f(*args, **kwargs)
 
-            try:
-                f(*args, **kwargs)
-            except:
-                pass
-            os.unlink(pidfile)
+            os.remove(pidfile)
 
         return inner_wrapper
 

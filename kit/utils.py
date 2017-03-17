@@ -31,7 +31,7 @@ def chunked_path(instance, filename):
     if len(fname) % 2:
         fname[-1] = (fname[-1][0], '')
 
-    fname = map(lambda x: ''.join(x), fname)
+    fname = list(map(lambda x: ''.join(x), fname))
 
     fname.insert(0, instance.__class__.__name__.lower())
     fname.append('%s.%s' % (filename, extension))

@@ -40,7 +40,7 @@ def pid_lock(*args, **kwargs):
                 except TypeError:
                     os.remove(pidfile)
                 else:
-                    print 'It is already running'
+                    print('It is already running')
                     sys.exit()
 
             pid = str(os.getpid())

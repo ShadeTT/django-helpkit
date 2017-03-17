@@ -15,6 +15,24 @@ def cached(key, func, ttl=60*60*24):
     return data
 
 
+def chunked_path_handler(class_name, filename):
+    extension = filename.split('.')[-1]
+
+    filename = uuid.uuid4().hex
+
+    fname = list(zip(*[iter(filename)]*2))
+
+    if len(fname) % 2:
+        fname[-1] = (fname[-1][0], '0')
+
+    fname = list(map(lambda x: ''.join(x), fname))
+
+    fname.insert(0, class_name)
+    fname.append('%s.%s' % (filename, extension))
+
+    return os.path.join(*fname)
+
+
 def chunked_path(instance, filename):
 
     """
@@ -22,18 +40,4 @@ def chunked_path(instance, filename):
     example: blabla/f0/a5/64/5e/ee/df/f0a5645eeedf.jpg
     """
 
-    extension = filename.split('.')[-1]
-
-    filename = uuid.uuid4().hex
-
-    fname = list(map(None, *([iter(filename)] * 2)))
-
-    if len(fname) % 2:
-        fname[-1] = (fname[-1][0], '')
-
-    fname = list(map(lambda x: ''.join(x), fname))
-
-    fname.insert(0, instance.__class__.__name__.lower())
-    fname.append('%s.%s' % (filename, extension))
-
-    return os.path.join(*fname)
+    return chunked_path_handler(instance.__class__.__name__.lower(), filename)

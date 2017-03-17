@@ -26,7 +26,7 @@ def chunked_path(instance, filename):
 
     filename = uuid.uuid4().hex
 
-    fname = map(None, *([iter(filename)] * 2))
+    fname = list(map(None, *([iter(filename)] * 2)))
 
     if len(fname) % 2:
         fname[-1] = (fname[-1][0], '')

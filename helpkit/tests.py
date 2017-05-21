@@ -2,7 +2,7 @@
 import os
 import unittest
 
-from kit.utils import chunked_path_handler
+from helpkit.utils import chunked_path_handler
 
 __author__ = 'shade'
 
